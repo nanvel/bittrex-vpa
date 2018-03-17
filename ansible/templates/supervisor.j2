@@ -1,0 +1,6 @@
+[program:{{ project_name }}]
+command=/home/{{ project_user }}/.{{ project_name }}_venv/bin/python ./manage.py watch BTC-ETH
+process_name={{ project_name }}
+user={{ project_user }}
+directory=/home/{{ project_user }}/{{ project_name }}/
+environment=LOGS_DIR="{{ logs_dir }}",SERVER_PORT="{{ server_port }}",ENV="{{ env }}"

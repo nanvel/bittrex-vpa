@@ -1,0 +1,82 @@
+---
+- hosts: production
+  vars:
+  - project_user: deploy
+  - project_name: bittrex_vpa
+  - project_dir: "/home/{{ project_user }}/{{ project_name }}"
+  - venv_dir: "/home/{{ project_user }}/.{{ project_name }}_venv"
+  - logs_dir: "/var/log/{{ project_name }}"
+  - ansible_python_interpreter: /usr/bin/python3
+  vars_files:
+  - variables.yml
+  tasks:
+  - name: "apt-get update"
+    become: yes
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+  - name: "apt-get install"
+    become: yes
+    apt:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+    - build-essential
+    - virtualenv
+    - supervisor
+    - python3-dev
+    - nginx
+    - apache2-utils
+    - postgresql
+    - nodejs
+  - name: "Create deploy group"
+    become: yes
+    group:
+      name: "{{ project_user }}"
+      state: present
+  - name: "Create deploy user"
+    become: yes
+    user:
+      name: "{{ project_user }}"
+      shell: /bin/bash
+      groups: "{{ project_user }}"
+      append: yes
+  - name: "Synchronize the source"
+    synchronize:
+      dest: "/home/{{ project_user }}/{{ project_name }}/"
+      src: "{{ item }}"
+      rsync_opts:
+        - "--exclude=*.pyc"
+    with_items:
+    - ../vpa
+    - ../requirements.txt
+    - ../manage.py
+    become: yes
+    become_user: "{{ project_user }}"
+    tags:
+    - deploy
+  - name: "Logs folder"
+    file:
+      path: "{{ logs_dir }}"
+      state: directory
+      owner: "{{ project_user }}"
+      group: "{{ project_user }}"
+  - name: "Install requirements"
+    pip:
+      requirements: "/home/{{ project_user }}/{{ project_name }}/requirements.txt"
+      virtualenv: "/home/{{ project_user }}/.venv"
+    become_user: "{{ project_user }}"
+  - name: "Supervisor configuration"
+    template:
+      src: templates/supervisor.j2
+      dest: "/etc/supervisor/conf.d/{{ project_name }}.conf"
+  - name: "Nginx configuration"
+    template:
+      src: templates/nginx.j2
+      dest: "/etc/nginx/sites-enabled/{{ project_name }}"
+    notify: nginx restart
+  handlers:
+  - name: nginx restart
+    service:
+      name: nginx
+      state: restarted

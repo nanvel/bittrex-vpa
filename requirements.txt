@@ -1,0 +1,7 @@
+aiohttp==2.3.10
+cfscrape
+psycopg2-binary==2.7.4
+SQLAlchemy==1.2.5
+alembic==0.9.8
+aiopg==0.13.2
+python-dateutil==2.6.1
