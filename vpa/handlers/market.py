@@ -8,19 +8,21 @@ async def market_handler(request):
     market = request.match_info.get('market')
 
     lines = []
-    points = []
+    points_buy = []
+    points_sell = []
 
     async with request.app['pg'].acquire() as conn:
         async for row in conn.execute(
                 TradesTable.select().where(
-                    sa.and_(
-                        TradesTable.c.order_type == 'BUY',
-                        TradesTable.c.market == market
-                    )
-                ).order_by(TradesTable.c.timestamp).limit(200)):
-            points.append({'x': row.timestamp.isoformat(), 'y': row.quantity})
+                    TradesTable.c.market == market
+                ).order_by(sa.desc(TradesTable.c.timestamp)).limit(200)):
+            if row.order_type == 'BUY':
+                points_buy.append({'x': row.timestamp.isoformat(), 'y': row.quantity})
+            elif row.order_type == 'SELL':
+                points_sell.append({'x': row.timestamp.isoformat(), 'y': row.quantity})
 
-    lines.append({'label': 'Buy', 'data': points, 'borderColor': '#e6194b'})
+    lines.append({'label': 'Buy', 'data': points_buy, 'borderColor': '#e6194b'})
+    lines.append({'label': 'Sell', 'data': points_sell, 'borderColor': '#3cb44b'})
 
     datasets = '[' + ', '.join(
         ["{{label: '{label}', data: [{points}], borderColor: '{color}'}}".format(

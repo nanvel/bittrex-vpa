@@ -28,7 +28,7 @@
     - nginx
     - apache2-utils
     - postgresql
-    - nodejs
+    - nodejs-legacy
   - name: "Create deploy group"
     become: yes
     group:
@@ -51,6 +51,8 @@
     - ../vpa
     - ../requirements.txt
     - ../manage.py
+    - ../alembic
+    - ../alembic.ini
     become: yes
     become_user: "{{ project_user }}"
     tags:
@@ -64,7 +66,7 @@
   - name: "Install requirements"
     pip:
       requirements: "/home/{{ project_user }}/{{ project_name }}/requirements.txt"
-      virtualenv: "/home/{{ project_user }}/.venv"
+      virtualenv: "{{ venv_dir }}"
     become_user: "{{ project_user }}"
   - name: "Supervisor configuration"
     template:

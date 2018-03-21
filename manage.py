@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     if command == 'watch':
         from vpa.watcher import main
-        ioloop.run_until_complete(main(market=arguments[0]))
+        ioloop.run_until_complete(main(markets=arguments[0].split(',')))
 
     elif command == 'server':
         from vpa.server import main

@@ -21,7 +21,7 @@ async def on_trades(market, trades, db_engine):
         )
 
 
-async def main(market):
+async def main(markets):
     db_engine = await create_engine(
         dsn='dbname={db} user={user} password={password} host={host}'.format(
             db=settings.PG_DB,
@@ -34,7 +34,7 @@ async def main(market):
     api = BittrexAPI()
 
     try:
-        await api.socket([market], partial(on_trades, db_engine=db_engine))
+        await api.socket(markets, partial(on_trades, db_engine=db_engine))
     finally:
         db_engine.close()
         await db_engine.wait_closed()

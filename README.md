@@ -15,5 +15,5 @@ alembic upgrade head
 ## Deploy
 
 ```bash
-ca ansible && ansible-playbook deploy.yml -u root -i inventory/production.conf --vault-password-file <password file>
+cd ansible && ansible-playbook deploy.yml -u root -i <inventory file> --vault-password-file <password file>
 ```

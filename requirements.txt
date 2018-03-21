@@ -5,3 +5,4 @@ SQLAlchemy==1.2.5
 alembic==0.9.8
 aiopg==0.13.2
 python-dateutil==2.6.1
+aiohttp-jinja2==0.15.0
