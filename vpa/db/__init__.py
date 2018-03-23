@@ -3,6 +3,7 @@ from aiopg.sa import create_engine
 from vpa import settings
 
 from .base import metadata
+from .minutes import MinutesTable
 from .trades import TradesTable
 
 

@@ -12,7 +12,8 @@ TradesTable = sa.Table(
     sa.Column('order_type', sa.String(4)),
     sa.Column('rate', sa.Float()),
     sa.Column('quantity', sa.Float()),
-    sa.Column('timestamp', sa.DateTime())
+    sa.Column('timestamp', sa.DateTime()),
+    sa.Index('idx_timestamp', 'timestamp', unique=False)
 )
 
 
