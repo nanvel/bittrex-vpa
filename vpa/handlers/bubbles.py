@@ -22,13 +22,16 @@ async def bubbles_handler(request):
             elif row.order_type == 'SELL':
                 points_sell.append({'x': row.timestamp.isoformat(), 'r': row.quantity, 'y': row.rate})
 
-    max_buy_volume = max([i['r'] for i in points_buy])
-    for p in points_buy:
-        p['r'] = p['r'] / max_buy_volume * 100
+    max_volume = max(
+        max([i['r'] for i in points_buy]),
+        max([i['r'] for i in points_sell])
+    )
 
-    max_sell_volume = max([i['r'] for i in points_sell])
+    for p in points_buy:
+        p['r'] = p['r'] / max_volume * 100
+
     for p in points_sell:
-        p['r'] = p['r'] / max_sell_volume * 100
+        p['r'] = p['r'] / max_volume * 100
 
     return aiohttp_jinja2.render_template(
         'bubbles.j2',

@@ -4,7 +4,7 @@ import dateutil.parser
 from aiopg.sa import create_engine
 
 from vpa import settings
-from vpa.bittrex import BittrexAPI
+from vpa.bittrex import BittrexTradesSocket
 from vpa.db.trades import TradesTable
 
 
@@ -31,10 +31,13 @@ async def main(markets):
         )
     )
 
-    api = BittrexAPI()
+    trades_socket = BittrexTradesSocket(
+        tickers=markets,
+        on_trades=partial(on_trades, db_engine=db_engine)
+    )
 
     try:
-        await api.socket(markets, partial(on_trades, db_engine=db_engine))
+        await trades_socket.run()
     finally:
         db_engine.close()
         await db_engine.wait_closed()
