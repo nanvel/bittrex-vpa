@@ -38,7 +38,8 @@ class BittrexTradesSocket:
             if not self._ws:
                 continue
             if self._last_message and time.time() - self._last_message > self.RECONNECT_TIMEOUT:
-                await self._ws.close()
+                if self._ws:
+                    await self._ws.close()
                 self.listen_task.cancel()
                 self._last_message = None
                 self._ws = None
@@ -48,9 +49,11 @@ class BittrexTradesSocket:
     async def stop(self):
         self.connected = False
         self._last_message = None
-        await self._ws.close()
-        self.listen_task.cancel()
-        self._ws = None
+        if self._ws:
+            await self._ws.close()
+            self._ws = None
+        if self.listen_task:
+            self.listen_task.cancel()
 
     async def _listen(self):
         """
@@ -89,19 +92,26 @@ class BittrexTradesSocket:
                     }
                     await ws.send_str(json.dumps(message))
                 async for msg in ws:
-                    self._last_message = time.time()
                     if msg.type == aiohttp.WSMsgType.TEXT:
-                        data = json.loads(msg.data)
-                        if 'M' in data:
-                            for block in data['M']:
-                                if block['M'] == 'updateExchangeState':
-                                    for change in block['A']:
-                                        fills = change['Fills']
-                                        if fills:
-                                            await self.on_trades(market=change['MarketName'], trades=fills)
+                        self._last_message = time.time()
+                        try:
+                            data = json.loads(msg.data)
+                            if 'M' in data:
+                                for block in data['M']:
+                                    if block['M'] == 'updateExchangeState':
+                                        for change in block['A']:
+                                            trades = change['Fills']
+                                            if trades:
+                                                await self.on_trades(
+                                                    market=change['MarketName'],
+                                                    trades=trades
+                                                )
+                        except Exception as e:
+                            logger.error("Error while handling message: {}".format(e))
                     elif msg.tp == aiohttp.WSMsgType.closed:
                         break
                     elif msg.tp == aiohttp.WSMsgType.error:
                         break
+                    else:
+                        logger.warning("Message: {}".format(msg.tp))
             self._ws = None
-            self.connected = False

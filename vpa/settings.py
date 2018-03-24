@@ -3,6 +3,8 @@ import os
 from vpa.utils import rel
 
 
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'ERROR')
+
 PG_HOST = 'localhost'
 PG_USER = 'vpa'
 PG_PASSWORD = 'vpa'

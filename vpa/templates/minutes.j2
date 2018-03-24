@@ -1,0 +1,44 @@
+{% extends "base.j2" %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
+{% endblock %}
+{% block title %}Minutes{% endblock %}
+{% block content %}
+<div style="height: 400px;"><canvas id="minutes_chart"></canvas></div>
+<script>
+    var ctx = document.getElementById("minutes_chart").getContext("2d");
+    var minutesChart = new Chart(ctx,{
+        type: 'line',
+        data: {
+            datasets: {{ datasets|safe }}
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'time'
+                }],
+                yAxes: [{
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    id: 'y-axis-1'
+                }, {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    id: 'y-axis-2',
+                    gridLines: {
+                        drawOnChartArea: false
+                    }
+                }]
+            },
+            animation: false,
+            elements: {
+                line: {
+                    tension: 0
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
