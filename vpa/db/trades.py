@@ -18,6 +18,10 @@ TradesTable = sa.Table(
 
 
 class TradeMapper:
+
+    ORDER_TYPE_SELL = 'SELL'
+    ORDER_TYPE_BUY = 'BUY'
+
     def __init__(self, trade_id, market, order_type, rate, quantity, timestamp):
         self.trade_id = trade_id
         self.market = market
